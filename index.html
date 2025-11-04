@@ -39,12 +39,12 @@
     </p>
   </div>
 
-  <script>
+   <script>
     const timerEl = document.getElementById("timer");
     const messageEl = document.getElementById("message");
     const heading = document.querySelector("h1");
 
-    // نحفظ أول وقت فتح في localStorage بحيث لو الشخص رجع قبل مرور 15 ساعة يكمّل العدّ من نفس النقطة
+    // نحفظ أول وقت فتح في localStorage بحيث لو الشخص رجع قبل مرور 24 ساعة يكمّل العدّ من نفس النقطة
     let firstOpenTime = localStorage.getItem("firstOpenTime");
 
     if (!firstOpenTime) {
@@ -54,7 +54,7 @@
       firstOpenTime = parseInt(firstOpenTime);
     }
 
-    const unlockAfter = 15 * 60 * 60 * 1000; // 15 ساعة بالمللي ثانية
+    const unlockAfter = 15 * 60 * 60 * 1000; // 24 ساعة بالمللي ثانية
     const unlockTime = firstOpenTime + unlockAfter;
 
     function updateTimer() {
@@ -69,7 +69,7 @@
         const hours = Math.floor((distance % (1000 * 60 * 60 * 15)) / (1000 * 60 * 60));
         const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-        timerEl.textContent = ⏳ سيتم فتح الرسالة بعد ${hours} ساعة، ${minutes} دقيقة، ${seconds} ثانية;
+        timerEl.textContent = `⏳ سيتم فتح الرسالة بعد ${hours} ساعة، ${minutes} دقيقة، ${seconds} ثانية`;
       }
     }
 
