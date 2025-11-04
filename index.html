@@ -1,81 +1,183 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>رسالة مقفولة</title>
   <style>
-    body {
-      font-family: 'Cairo', sans-serif;
-      background-color: #0f172a;
-      color: #e2e8f0;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      text-align: center;
-      padding: 20px;
+    :root {
+      --bg: #0f172a;
+      --card: #0f172a;
+      --panel: #111827;
+      --muted: #9ca3af;
+      --accent: #38bdf8;
+      --text: #e6eef8;
     }
-    h1 { font-size: 1.8rem; margin-bottom: 10px; }
-    .timer { font-size: 1.4rem; color: #38bdf8; margin-bottom: 20px; }
-    .message {
-      background: #1e293b;
-      padding: 20px;
-      border-radius: 16px;
-      max-width: 600px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: "Cairo", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg,#071028 0%, var(--bg) 100%);
+      color:var(--text);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+      -webkit-font-smoothing:antialiased;
+    }
+
+    .container{
+      width:100%;
+      max-width:760px;
+      text-align:center;
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:14px;
+      padding:28px;
+      box-shadow: 0 10px 30px rgba(2,6,23,0.6);
+      border: 1px solid rgba(255,255,255,0.03);
+    }
+
+    h1{ margin:0 0 12px; font-size:1.6rem; display:flex; align-items:center; gap:10px; justify-content:center; }
+    .timer{ color:var(--accent); font-size:1.1rem; margin-bottom:18px; }
+    .message{ display:none; text-align:right; direction:rtl; line-height:1.9; font-size:1.05rem; color:#e9eef6; }
+    .meta{ color:var(--muted); font-size:0.9rem; margin-bottom:14px; }
+    .controls{ margin-top:18px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+    .btn{
+      background:transparent;
+      border:1px solid rgba(255,255,255,0.06);
+      padding:8px 14px;
+      border-radius:10px;
+      color:var(--text);
+      cursor:pointer;
+      font-size:0.95rem;
+    }
+    .btn.ghost{ background:transparent; }
+    .btn.primary{
+      background:var(--accent);
+      color:#072033;
+      border:none;
+      box-shadow: 0 6px 18px rgba(56,189,248,0.12);
+    }
+
+    footer{ margin-top:14px; color:var(--muted); font-size:0.85rem; }
+
+    @media (max-width:420px){
+      .card{ padding:18px; }
+      h1{ font-size:1.2rem }
     }
   </style>
 </head>
 <body>
+  <div class="container">
+    <div class="card" role="main" aria-live="polite">
+      <h1>📩 الرسالة مقفولة حالياً</h1>
+      <div class="meta">هذه الصفحة تفتح المحتوى بعد مرور الوقت المحدد من أول زيارة.</div>
+      <div class="timer" id="timer">⏳ جارٍ الحساب...</div>
 
-  <h1>📩 الرسالة مقفولة حالياً</h1>
-  <p class="timer" id="timer"></p>
-  <div class="message" id="message" style="display:none;">
-    <h2>💬 الرسالة:</h2>
-    <p>
-      خليهم يغسلوني بدبلتي ودي وصية.
-    </p>
+      <div class="message" id="message">
+        <h2 style="margin-top:0; text-align:right;">💬 نص الرسالة</h2>
+        <p>
+          حياتي مكنتش هتنفع وانتي مش فيها فا اخترت اني انهيها بعد ما شلتيني من قلبك و وصيتي انهم يغسلوني بدبلتي و يدفونيني بيها علشان تكون معايه و مطمناني وانا لوحدي و مش مسامح اي حد يشلها من ايدي
+        </p>
+      </div>
+
+      <div class="controls" aria-hidden="false">
+        <button class="btn primary" id="forceOpenBtn">فتح الآن (للاختبار)</button>
+        <button class="btn" id="resetBtn">إعادة تعيين العدّ</button>
+      </div>
+
+      <footer>
+        * ملاحظة: الوقت يُحسب من أول مرة يزور فيها المستلم هذه الصفحة. لإعادة العدّ لمسح الحالة احتفظ بزر "إعادة تعيين العدّ".
+      </footer>
+    </div>
   </div>
 
   <script>
+    // ------- إعدادات قابلة للتعديل -------
+    // مدة القفل بالملّي ثانية — هنا 15 ساعة
+    const UNLOCK_AFTER_MS = 15 * 60 * 60 * 1000;
+
+    // مفتاح التخزين المحلي
+    const STORAGE_KEY = "firstOpenTime_locked_message_v1";
+
+    // عناصر DOM
     const timerEl = document.getElementById("timer");
     const messageEl = document.getElementById("message");
-    const heading = document.querySelector("h1");
+    const forceOpenBtn = document.getElementById("forceOpenBtn");
+    const resetBtn = document.getElementById("resetBtn");
 
-    // نحفظ أول وقت فتح في localStorage بحيث لو الشخص رجع قبل مرور 24 ساعة يكمّل العدّ من نفس النقطة
-    let firstOpenTime = localStorage.getItem("firstOpenTime");
-
-    if (!firstOpenTime) {
-      firstOpenTime = new Date().getTime();
-      localStorage.setItem("firstOpenTime", firstOpenTime);
-    } else {
-      firstOpenTime = parseInt(firstOpenTime);
+    // قراءة/إنشاء زمن الفتح الأول
+    function getOrCreateFirstOpenTime() {
+      let t = localStorage.getItem(STORAGE_KEY);
+      if (!t) {
+        t = Date.now().toString();
+        localStorage.setItem(STORAGE_KEY, t);
+      }
+      return parseInt(t, 10);
     }
 
-    const unlockAfter = 15 * 60 * 60 * 1000; // 15 ساعة بالمللي ثانية
-    const unlockTime = firstOpenTime + unlockAfter;
+    function clearFirstOpenTime() {
+      localStorage.removeItem(STORAGE_KEY);
+    }
 
+    // عملية عرض العداد
     function updateTimer() {
-      const now = new Date().getTime();
-      const distance = unlockTime - now;
+      const firstOpen = getOrCreateFirstOpenTime();
+      const unlockTime = firstOpen + UNLOCK_AFTER_MS;
+      const now = Date.now();
+      const diff = unlockTime - now;
 
-      if (distance <= 0) {
-        heading.textContent = "✅ الرسالة الآن مفتوحة";
+      if (diff <= 0) {
+        // مفتوح
         timerEl.style.display = "none";
         messageEl.style.display = "block";
       } else {
-        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-        timerEl.textContent = ⏳ سيتم فتح الرسالة بعد ${hours} ساعة، ${minutes} دقيقة، ${seconds} ثانية;
+        // حساب ساعات/دقائق/ثواني
+        const totalSeconds = Math.floor(diff / 1000);
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        // صياغة نصية مناسبة (عربي)
+        let parts = [];
+        if (hours > 0) parts.push(hours + " ساعة");
+        if (minutes > 0) parts.push(minutes + " دقيقة");
+        parts.push(seconds + " ثانية");
+
+        timerEl.textContent = "⏳ سيتم فتح الرسالة بعد " + parts.join("، ");
       }
     }
 
-    updateTimer();
-    setInterval(updateTimer, 1000);
-  </script>
+    // تهيئة التحديث كل ثانية
+    let intervalId = null;
+    function start() {
+      // لو ما فيش وقت مخزن، سيتم إنشاؤه عند القراءة
+      updateTimer();
+      intervalId = setInterval(updateTimer, 1000);
+    }
 
+    // أزرار التحكم للاختبار/إعادة تعيين
+    forceOpenBtn.addEventListener("click", function () {
+      // لمسح القيود وفتح الرسالة مباشرة (مفيد لاختبار)
+      clearInterval(intervalId);
+      localStorage.setItem(STORAGE_KEY, (Date.now() - UNLOCK_AFTER_MS - 1000).toString());
+      updateTimer();
+      intervalId = setInterval(updateTimer, 1000);
+    });
+
+    resetBtn.addEventListener("click", function () {
+      // إعادة التهيئة: يزيل الوقت المخزن وسيبدأ العد من الزيارة الحالية
+      clearFirstOpenTime();
+      // إعادة إنشاء الوقت الآن
+      getOrCreateFirstOpenTime();
+      updateTimer();
+    });
+
+    // بدء التشغيل
+    start();
+  </script>
 </body>
 </html>
