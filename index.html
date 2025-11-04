@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>رسالة مقفولة</title>
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      background-color: #0f172a;
+      color: #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 { font-size: 1.8rem; margin-bottom: 10px; }
+    .timer { font-size: 1.4rem; color: #38bdf8; margin-bottom: 20px; }
+    .message {
+      background: #1e293b;
+      padding: 20px;
+      border-radius: 16px;
+      max-width: 600px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    }
+  </style>
+</head>
+<body>
+
+  <h1>📩 الرسالة مقفولة حالياً</h1>
+  <p class="timer" id="timer"></p>
+  <div class="message" id="message" style="display:none;">
+    <h2>💬 الرسالة:</h2>
+    <p>
+      خليهم يغسلوني بدبلتي ودي وصية.
+    </p>
+  </div>
+
+  <script>
+    const timerEl = document.getElementById("timer");
+    const messageEl = document.getElementById("message");
+    const heading = document.querySelector("h1");
+
+    // نحفظ أول وقت فتح في localStorage بحيث لو الشخص رجع قبل مرور 24 ساعة يكمّل العدّ من نفس النقطة
+    let firstOpenTime = localStorage.getItem("firstOpenTime");
+
+    if (!firstOpenTime) {
+      firstOpenTime = new Date().getTime();
+      localStorage.setItem("firstOpenTime", firstOpenTime);
+    } else {
+      firstOpenTime = parseInt(firstOpenTime);
+    }
+
+    const unlockAfter = 24 * 60 * 60 * 1000; // 24 ساعة بالمللي ثانية
+    const unlockTime = firstOpenTime + unlockAfter;
+
+    function updateTimer() {
+      const now = new Date().getTime();
+      const distance = unlockTime - now;
+
+      if (distance <= 0) {
+        heading.textContent = "✅ الرسالة الآن مفتوحة";
+        timerEl.style.display = "none";
+        messageEl.style.display = "block";
+      } else {
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        timerEl.textContent = `⏳ سيتم فتح الرسالة بعد ${hours} ساعة، ${minutes} دقيقة، ${seconds} ثانية`;
+      }
+    }
+
+    updateTimer();
+    setInterval(updateTimer, 1000);
+  </script>
+
+</body>
+</html>
