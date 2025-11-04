@@ -3,181 +3,270 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>رسالة مقفولة</title>
+  <title>رسالة مفاجأة</title>
   <style>
-    :root {
-      --bg: #0f172a;
-      --card: #0f172a;
-      --panel: #111827;
-      --muted: #9ca3af;
-      --accent: #38bdf8;
-      --text: #e6eef8;
+    :root{
+      --bg:#071028;
+      --card:#0b1220;
+      --accent:#38bdf8;
+      --muted:#9ca3af;
+      --text:#e6eef8;
+      --success:#10b981;
     }
     html,body{height:100%}
     body{
       margin:0;
       font-family: "Cairo", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      background: linear-gradient(180deg,#071028 0%, var(--bg) 100%);
+      background: linear-gradient(180deg,#071028 0%, #0f172a 100%);
       color:var(--text);
       display:flex;
       align-items:center;
       justify-content:center;
       padding:24px;
-      -webkit-font-smoothing:antialiased;
     }
-
-    .container{
-      width:100%;
-      max-width:760px;
-      text-align:center;
-    }
-
+    .wrap{ width:100%; max-width:720px; }
     .card{
       background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      padding:26px;
       border-radius:14px;
-      padding:28px;
       box-shadow: 0 10px 30px rgba(2,6,23,0.6);
-      border: 1px solid rgba(255,255,255,0.03);
+      border:1px solid rgba(255,255,255,0.03);
+      text-align:right;
     }
-
-    h1{ margin:0 0 12px; font-size:1.6rem; display:flex; align-items:center; gap:10px; justify-content:center; }
-    .timer{ color:var(--accent); font-size:1.1rem; margin-bottom:18px; }
-    .message{ display:none; text-align:right; direction:rtl; line-height:1.9; font-size:1.05rem; color:#e9eef6; }
-    .meta{ color:var(--muted); font-size:0.9rem; margin-bottom:14px; }
-    .controls{ margin-top:18px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
-    .btn{
-      background:transparent;
-      border:1px solid rgba(255,255,255,0.06);
-      padding:8px 14px;
+    h1{ margin:0 0 8px; display:flex; align-items:center; gap:10px; font-size:1.4rem; }
+    p.lead{ color:var(--muted); margin:6px 0 18px; font-size:0.95rem; }
+    .input-row{ display:flex; gap:10px; align-items:center; justify-content:flex-end; margin-bottom:12px; }
+    input[type="password"]{
+      padding:10px 12px;
       border-radius:10px;
+      border:1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.01);
+      color:var(--text);
+      font-size:1rem;
+      width:220px;
+      text-align:center;
+    }
+    .btn{
+      padding:9px 14px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,0.06);
+      background:transparent;
       color:var(--text);
       cursor:pointer;
       font-size:0.95rem;
     }
-    .btn.ghost{ background:transparent; }
-    .btn.primary{
-      background:var(--accent);
-      color:#072033;
-      border:none;
-      box-shadow: 0 6px 18px rgba(56,189,248,0.12);
-    }
-
-    footer{ margin-top:14px; color:var(--muted); font-size:0.85rem; }
-
-    @media (max-width:420px){
-      .card{ padding:18px; }
-      h1{ font-size:1.2rem }
+    .btn.primary{ background:var(--accent); color:#062431; border:none; box-shadow:0 6px 18px rgba(56,189,248,0.12); }
+    .status{ margin-top:10px; color:var(--muted); font-size:0.95rem; min-height:30px; }
+    .message{ display:none; margin-top:18px; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); padding:18px; border-radius:10px; text-align:right; line-height:1.7; }
+    .celebrate{ font-weight:700; color:var(--success); font-size:1.05rem; margin-bottom:8px; display:flex; gap:8px; align-items:center; justify-content:flex-end; }
+    .lockout{ color:#fb7185; font-weight:600; }
+    .controls{ margin-top:14px; display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+    footer{ margin-top:14px; color:var(--muted); font-size:0.85rem; text-align:right; }
+    .confetti{ display:flex; gap:6px; justify-content:flex-end; margin-bottom:10px; font-size:1.1rem; transform:translateY(-4px); }
+    @media (max-width:520px){
+      input[type="password"]{ width:160px; }
+      .card{ padding:16px; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="wrap">
     <div class="card" role="main" aria-live="polite">
-      <h1>📩 الرسالة مقفولة حالياً</h1>
-      <div class="meta">هذه الصفحة تفتح المحتوى بعد مرور الوقت المحدد من أول زيارة.</div>
-      <div class="timer" id="timer">⏳ جارٍ الحساب...</div>
+      <h1>🔒 ادخل رمز </h1>
+      <p class="lead">اكتب رمز مكوّن من 6 أرقام. إذا كتبت الرمز الصحيح ستظهر رسالة  تلقائيًا. بعد 3 محاولات خاطئة سيُمنع المحاولة مؤقتًا لمدة 15 ساعة.</p>
 
-      <div class="message" id="message">
-        <h2 style="margin-top:0; text-align:right;">💬 نص الرسالة</h2>
-        <p>
-          حياتي مكنتش هتنفع وانتي مش فيها فا اخترت اني انهيها بعد ما شلتيني من قلبك و وصيتي انهم يغسلوني بدبلتي و يدفونيني بيها علشان تكون معايه و مطمناني وانا لوحدي و مش مسامح اي حد يشلها من ايدي
-        </p>
+      <div class="input-row">
+        <input id="pwd" type="password" inputmode="numeric" pattern="\d{6}" maxlength="6" placeholder="رمز مكوّن من 6 أرقام" aria-label="رمز 🪦” />
+        <button class="btn primary" id="submitBtn">تحقق</button>
       </div>
 
-      <div class="controls" aria-hidden="false">
-        <button class="btn primary" id="forceOpenBtn">فتح الآن (للاختبار)</button>
-        <button class="btn" id="resetBtn">إعادة تعيين العدّ</button>
+      <div class="status" id="status"> </div>
+
+      <div class="message" id="message">
+        <div class="confetti">the 🪦</div>
+        <div class="celebrate">الرساله مفتوحه</div>
+        <p style="margin:0 0 6px;">          حياتي مكنتش هتنفع وانتي مش فيها فا اخترت اني انهيها بعد ما شلتيني من قلبك و وصيتي انهم يغسلوني بدبلتي و يدفونيني بيها علشان تكون معايه و مطمناني وانا لوحدي و مش مسامح اي حد يشلها من ايدي
+
+        </p>
+ </div>
+
+      <div class="controls">
+        <button class="btn" id="resetAttemptsBtn">إعادة المحاولات (مسح)</button>
+        <button class="btn" id="clearLockBtn">إزالة القفل مؤقتًا</button>
       </div>
 
       <footer>
-        * ملاحظة: الوقت يُحسب من أول مرة يزور فيها المستلم هذه الصفحة. لإعادة العدّ لمسح الحالة احتفظ بزر "إعادة تعيين العدّ".
+        الرموز الصحيحة محفوظة داخل الصفحة. إذا احتجت أغير النص أو أزيد رموز أخبرني.
       </footer>
     </div>
   </div>
 
   <script>
-    // ------- إعدادات قابلة للتعديل -------
-    // مدة القفل بالملّي ثانية — هنا 15 ساعة
-    const UNLOCK_AFTER_MS = 15 * 60 * 60 * 1000;
+    // ======= إعدادات قابلة للتعديل =======
+    const VALID_CODES = ["542005","281124","121224"]; // الرموز الصحيحة
+    const STORAGE_ATTEMPTS_KEY = "locked_msg_attempts_v1";
+    const STORAGE_LOCKUNTIL_KEY = "locked_msg_lockuntil_v1";
+    const MAX_ATTEMPTS = 3;
+    const LOCKOUT_MS = 15 * 60 * 60 * 1000; // <-- 15 ساعة بالمللي ثانية
+    // =====================================
 
-    // مفتاح التخزين المحلي
-    const STORAGE_KEY = "firstOpenTime_locked_message_v1";
-
-    // عناصر DOM
-    const timerEl = document.getElementById("timer");
+    const pwdEl = document.getElementById("pwd");
+    const submitBtn = document.getElementById("submitBtn");
+    const statusEl = document.getElementById("status");
     const messageEl = document.getElementById("message");
-    const forceOpenBtn = document.getElementById("forceOpenBtn");
-    const resetBtn = document.getElementById("resetBtn");
+    const resetBtn = document.getElementById("resetAttemptsBtn");
+    const clearLockBtn = document.getElementById("clearLockBtn");
 
-    // قراءة/إنشاء زمن الفتح الأول
-    function getOrCreateFirstOpenTime() {
-      let t = localStorage.getItem(STORAGE_KEY);
-      if (!t) {
-        t = Date.now().toString();
-        localStorage.setItem(STORAGE_KEY, t);
-      }
-      return parseInt(t, 10);
+    // مساعدة: قراءة القيم من localStorage
+    function getAttempts(){
+      return parseInt(localStorage.getItem(STORAGE_ATTEMPTS_KEY) || "0", 10);
+    }
+    function setAttempts(n){
+      localStorage.setItem(STORAGE_ATTEMPTS_KEY, String(n));
+    }
+    function resetAttempts(){
+      setAttempts(0);
     }
 
-    function clearFirstOpenTime() {
-      localStorage.removeItem(STORAGE_KEY);
+    function getLockUntil(){
+      const v = localStorage.getItem(STORAGE_LOCKUNTIL_KEY);
+      return v ? parseInt(v,10) : null;
+    }
+    function setLockUntil(ts){
+      localStorage.setItem(STORAGE_LOCKUNTIL_KEY, String(ts));
+    }
+    function clearLock(){
+      localStorage.removeItem(STORAGE_LOCKUNTIL_KEY);
     }
 
-    // عملية عرض العداد
-    function updateTimer() {
-      const firstOpen = getOrCreateFirstOpenTime();
-      const unlockTime = firstOpen + UNLOCK_AFTER_MS;
-      const now = Date.now();
-      const diff = unlockTime - now;
+    // تحقق إذا مقفول الآن
+    function isLocked(){
+      const until = getLockUntil();
+      return until && Date.now() < until;
+    }
 
-      if (diff <= 0) {
-        // مفتوح
-        timerEl.style.display = "none";
-        messageEl.style.display = "block";
+    // عرض باقي الوقت في القفل (ساعات/دقائق/ثواني)
+    function formatDuration(ms){
+      const totalSec = Math.max(0, Math.floor(ms/1000));
+      const hours = Math.floor(totalSec / 3600);
+      const minutes = Math.floor((totalSec % 3600) / 60);
+      const seconds = totalSec % 60;
+      const parts = [];
+      if (hours > 0) parts.push(hours + " ساعة");
+      if (minutes > 0) parts.push(minutes + " دقيقة");
+      parts.push(seconds + " ثانية");
+      return parts.join("، ");
+    }
+
+    // تحديث واجهة الحالة
+    function updateStatus(){
+      if (isLocked()){
+        const until = getLockUntil();
+        const remain = until - Date.now();
+        statusEl.innerHTML = `<span class="lockout">✋ تم قفل المحاولات — انتظر ${formatDuration(remain)} ثم جرّب مرة أخرى.</span>`;
+        submitBtn.disabled = true;
+        pwdEl.disabled = true;
+        return;
       } else {
-        // حساب ساعات/دقائق/ثواني
-        const totalSeconds = Math.floor(diff / 1000);
-        const hours = Math.floor(totalSeconds / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const seconds = totalSeconds % 60;
+        submitBtn.disabled = false;
+        pwdEl.disabled = false;
+      }
 
-        // صياغة نصية مناسبة (عربي)
-        let parts = [];
-        if (hours > 0) parts.push(hours + " ساعة");
-        if (minutes > 0) parts.push(minutes + " دقيقة");
-        parts.push(seconds + " ثانية");
-
-        timerEl.textContent = "⏳ سيتم فتح الرسالة بعد " + parts.join("، ");
+      const att = getAttempts();
+      if (att > 0){
+        statusEl.textContent = `عدد المحاولات الخاطئة: ${att} / ${MAX_ATTEMPTS}`;
+      } else {
+        statusEl.textContent = "";
       }
     }
 
-    // تهيئة التحديث كل ثانية
-    let intervalId = null;
-    function start() {
-      // لو ما فيش وقت مخزن، سيتم إنشاؤه عند القراءة
-      updateTimer();
-      intervalId = setInterval(updateTimer, 1000);
+    // فتح الرسالة (نجاح)
+    function openMessage(){
+      messageEl.style.display = "block";
+      statusEl.textContent = "✅!";
+      resetAttempts();
+      clearLock();
+      pwdEl.value = "";
+      submitBtn.disabled = true;
+      pwdEl.disabled = true;
     }
 
-    // أزرار التحكم للاختبار/إعادة تعيين
-    forceOpenBtn.addEventListener("click", function () {
-      // لمسح القيود وفتح الرسالة مباشرة (مفيد لاختبار)
-      clearInterval(intervalId);
-      localStorage.setItem(STORAGE_KEY, (Date.now() - UNLOCK_AFTER_MS - 1000).toString());
-      updateTimer();
-      intervalId = setInterval(updateTimer, 1000);
+    // معالجة التحقق
+    function handleCheck(){
+      if (isLocked()){
+        updateStatus();
+        return;
+      }
+
+      const val = (pwdEl.value || "").trim();
+      if (!/^\d{6}$/.test(val)){
+        statusEl.textContent = "الرجاء إدخال رمز مكوّن من 6 أرقام.";
+        return;
+      }
+
+      // تحقق من الصحة
+      if (VALID_CODES.includes(val)){
+        openMessage();
+        return;
+      }
+
+      // خاطئ
+      let attempts = getAttempts();
+      attempts += 1;
+      setAttempts(attempts);
+
+      if (attempts >= MAX_ATTEMPTS){
+        const until = Date.now() + LOCKOUT_MS;
+        setLockUntil(until);
+        statusEl.innerHTML = `<span class="lockout">تم تجاوز المحاولات. انتظر ${formatDuration(LOCKOUT_MS)} قبل المحاولة مجددًا.</span>`;
+        submitBtn.disabled = true;
+        pwdEl.disabled = true;
+        startLockCountdown();
+      } else {
+        statusEl.textContent = `رمز خاطئ. عدد المحاولات: ${attempts} / ${MAX_ATTEMPTS}`;
+      }
+    }
+
+    // عداد للقفل لعرض الوقت المتبقي كل ثانية
+    let lockInterval = null;
+    function startLockCountdown(){
+      if (lockInterval) clearInterval(lockInterval);
+      lockInterval = setInterval(function(){
+        if (!isLocked()){
+          clearInterval(lockInterval);
+          lockInterval = null;
+          updateStatus();
+          return;
+        }
+        updateStatus();
+      }, 1000);
+    }
+
+    // أزرار التحكم
+    submitBtn.addEventListener("click", handleCheck);
+    pwdEl.addEventListener("keydown", function(e){
+      if (e.key === "Enter") handleCheck();
     });
 
-    resetBtn.addEventListener("click", function () {
-      // إعادة التهيئة: يزيل الوقت المخزن وسيبدأ العد من الزيارة الحالية
-      clearFirstOpenTime();
-      // إعادة إنشاء الوقت الآن
-      getOrCreateFirstOpenTime();
-      updateTimer();
+    resetBtn.addEventListener("click", function(){
+      resetAttempts();
+      clearLock();
+      messageEl.style.display = "none";
+      pwdEl.value = "";
+      updateStatus();
     });
 
-    // بدء التشغيل
-    start();
+    clearLockBtn.addEventListener("click", function(){
+      clearLock();
+      resetAttempts();
+      updateStatus();
+    });
+
+    // بدء الحالة عند تحميل الصفحة
+    (function init(){
+      updateStatus();
+      if (isLocked()) startLockCountdown();
+    })();
   </script>
 </body>
 </html>
